@@ -11,12 +11,12 @@ import {
 
 // Auth Services
 export const authService = {
-  login: async (email: string, password: string): Promise<ApiResponse<{ token: string; user: User }>> => {
+  login: async (email: string, password: string): Promise<{ token: string; user: User }> => {
     const response = await axiosInstance.post('/auth/login', { email, password });
     return response.data;
   },
 
-  register: async (username: string, email: string, password: string): Promise<ApiResponse<{ token: string; user: User }>> => {
+  register: async (username: string, email: string, password: string): Promise<{ token: string; user: User }> => {
     const response = await axiosInstance.post('/auth/register', { username, email, password });
     return response.data;
   },
