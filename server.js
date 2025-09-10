@@ -36,10 +36,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong!' });
 });
 
-// Handle 404
-app.use('*', (req, res) => {
-  res.status(404).json({ message: 'Route not found' });
-});
+// // Handle 404
+// app.use('*', (req, res) => {
+//   res.status(404).json({ message: 'Route not found' });
+// });
 
 const PORT = process.env.PORT || 5000;
 

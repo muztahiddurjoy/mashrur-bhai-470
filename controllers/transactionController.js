@@ -1,6 +1,6 @@
 const Transaction = require('../models/Transaction');
 const Budget = require('../models/Budget');
-const { sendNotification } = require('../utils/notifications');
+// const { sendNotification } = require('../utils/notifications');
 
 // Create a new transaction
 exports.createTransaction = async (req, res) => {
@@ -180,11 +180,11 @@ async function checkBudgetAlerts(userId, category, amount) {
       
       if (percentage >= budget.alertThreshold) {
         // Send notification
-        await sendNotification(
-          userId,
-          `Budget Alert: You've reached ${Math.round(percentage)}% of your ${budget.category} budget`,
-          'budget_alert'
-        );
+        // await sendNotification(
+        //   userId,
+        //   `Budget Alert: You've reached ${Math.round(percentage)}% of your ${budget.category} budget`,
+        //   'budget_alert'
+        // );
       }
     }
   } catch (error) {
