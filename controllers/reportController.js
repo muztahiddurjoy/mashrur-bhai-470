@@ -2,11 +2,9 @@ const Transaction = require('../models/Transaction');
 const Goal = require('../models/Goal');
 const { analyzeSpendingPatterns } = require('../utils/aiAnalysis');
 
-// Get financial reports
 exports.getReports = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    
     const userId = req.user.id;
     
     // Date filters
@@ -14,67 +12,13 @@ exports.getReports = async (req, res) => {
     if (startDate) dateFilter.$gte = new Date(startDate);
     if (endDate) dateFilter.$lte = new Date(endDate);
     
-    // Get income vs expenses
-    const incomeExpense = await Transaction.aggregate([
-      {
-        $match: {
-          userId: userId,
-          ...(startDate || endDate ? { date: dateFilter } : {})
-        }
-      },
-      {
-        $group: {
-          _id: '$type',
-          total: { $sum: '$amount' }
-        }
-      }
+    // Get financial data
+    const [incomeExpense, categorySpending, monthlyTrends, goals] = await Promise.all([
+      this.getIncomeExpenseData(userId, dateFilter),
+      this.getCategorySpending(userId, dateFilter),
+      this.getMonthlyTrends(userId, dateFilter),
+      Goal.find({ userId: userId })
     ]);
-    
-    // Get category-wise spending
-    const categorySpending = await Transaction.aggregate([
-      {
-        $match: {
-          userId: userId,
-          type: 'expense',
-          ...(startDate || endDate ? { date: dateFilter } : {})
-        }
-      },
-      {
-        $group: {
-          _id: '$category',
-          total: { $sum: '$amount' }
-        }
-      },
-      {
-        $sort: { total: -1 }
-      }
-    ]);
-    
-    // Get monthly trends
-    const monthlyTrends = await Transaction.aggregate([
-      {
-        $match: {
-          userId: userId,
-          ...(startDate || endDate ? { date: dateFilter } : {})
-        }
-      },
-      {
-        $group: {
-          _id: {
-            year: { $year: '$date' },
-            month: { $month: '$date' },
-            type: '$type'
-          },
-          total: { $sum: '$amount' }
-        }
-      },
-      {
-        $sort: { '_id.year': 1, '_id.month': 1 }
-      }
-    ]);
-    
-    // Get goals progress
-    const goals = await Goal.find({ userId: userId });
     
     // AI Analysis
     const aiInsights = await analyzeSpendingPatterns(userId, startDate, endDate);
@@ -88,6 +32,31 @@ exports.getReports = async (req, res) => {
         goals,
         aiInsights
       }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Add new endpoint for detailed AI analysis
+exports.getDetailedAnalysis = async (req, res) => {
+  try {
+    const { startDate, endDate, analysisType } = req.query;
+    const userId = req.user.id;
+    
+    const analysis = await geminiService.generateDetailedReport(
+      userId, 
+      startDate, 
+      endDate, 
+      analysisType
+    );
+    
+    res.json({
+      success: true,
+      data: analysis
     });
   } catch (error) {
     res.status(500).json({

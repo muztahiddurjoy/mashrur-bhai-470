@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/database');
+const aiAnalysisRoutes = require('./routes/aiAnalysis');
 
 // Load env vars
 dotenv.config();
@@ -23,12 +24,14 @@ const budgets = require('./routes/budgets');
 const goals = require('./routes/goals');
 const reports = require('./routes/reports');
 
+
 // Mount routers
 app.use('/api/auth', auth);
 app.use('/api/transactions', transactions);
 app.use('/api/budgets', budgets);
 app.use('/api/goals', goals);
 app.use('/api/reports', reports);
+app.use('/api/ai-analysis', aiAnalysisRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
